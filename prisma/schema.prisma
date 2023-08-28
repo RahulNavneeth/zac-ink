@@ -1,0 +1,66 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id        Int        @id @default(autoincrement())
+    username  String
+    email     String     @unique
+    password  String
+    url       String
+    purchases Purchase[]
+    type      USER_TYPE  @default(USER)
+}
+
+model Item {
+    id            Int            @id @default(autoincrement())
+    name          String
+    price         Float
+    purchaseItems PurchaseItem[]
+    ItemImage     ItemImage[]
+    type          type?          @relation(fields: [typeId], references: [id])
+    typeId        Int?
+}
+
+model Purchase {
+    id        Int            @id @default(autoincrement())
+    createdAt DateTime       @default(now())
+    updatedAt DateTime       @updatedAt
+    userId    Int
+    user      User           @relation(fields: [userId], references: [id])
+    items     PurchaseItem[]
+}
+
+model PurchaseItem {
+    id         Int      @id @default(autoincrement())
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+    purchaseId Int
+    purchase   Purchase @relation(fields: [purchaseId], references: [id])
+    itemId     Int
+    item       Item     @relation(fields: [itemId], references: [id])
+    quantity   Int
+}
+
+model ItemImage {
+    id     Int    @id @default(autoincrement())
+    itemId Int
+    item   Item   @relation(fields: [itemId], references: [id])
+    url    String
+}
+
+model type {
+    id    Int    @id @default(autoincrement())
+    name  String
+    items Item[]
+}
+
+enum USER_TYPE {
+    ADMIN
+    USER
+}
